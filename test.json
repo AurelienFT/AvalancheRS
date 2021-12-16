@@ -1,0 +1,47 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "import(\"/Users/aurelienfoucault/Avalanche/avalanchejs/node_modules/@types/bn.js/index\")": {
+            "type": "object"
+        }
+    },
+    "properties": {
+        "alias": {
+            "type": "string"
+        },
+        "avaxAssetID": {
+            "type": "string"
+        },
+        "blockchainID": {
+            "type": "string"
+        },
+        "creationTxFee": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/import(\"/Users/aurelienfoucault/Avalanche/avalanchejs/node_modules/@types/bn.js/index\")"
+                },
+                {
+                    "type": "number"
+                }
+            ]
+        },
+        "fee": {
+            "$ref": "#/definitions/import(\"/Users/aurelienfoucault/Avalanche/avalanchejs/node_modules/@types/bn.js/index\")"
+        },
+        "txFee": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/import(\"/Users/aurelienfoucault/Avalanche/avalanchejs/node_modules/@types/bn.js/index\")"
+                },
+                {
+                    "type": "number"
+                }
+            ]
+        },
+        "vm": {
+            "type": "string"
+        }
+    },
+    "type": "object"
+}
+
