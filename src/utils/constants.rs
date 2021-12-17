@@ -459,7 +459,7 @@ impl MergeRule {
 }
 
 lazy_static! {
-  pub static ref NETWORK: HashMap<i32, Network> = {
+  pub static ref NETWORK: HashMap<u16, Network> = {
     let mut m = HashMap::new();
 
     let mut addresses_0: HashMap<&'static str, EnumNetwork> = HashMap::new();
