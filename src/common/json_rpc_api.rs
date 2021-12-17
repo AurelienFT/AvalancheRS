@@ -1,15 +1,32 @@
 use crate::common::api_base::ApiBase;
-use clru::CLruCache;
 use std::collections::HashMap;
 use hyper::client::{ResponseFuture};
-use hyper::{Body};
-use crate::avalanche::AvalancheCore;
-use serde::{Serialize, Deserialize};
+use crate::avalanche_core::AvalancheCore;
+use serde::{Serialize, Serializer, Deserialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
 enum JsonRpcParams {
     String(String),
     HashMap(HashMap<String, String>),
+}
+
+impl Serialize for JsonRpcParams {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match self {
+            JsonRpcParams::String(s) => s.serialize(serializer),
+            JsonRpcParams::HashMap(h) => h.serialize(serializer),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct JsonRpcResponse<T> {
+    pub jsonrpc: String,
+    pub id: String,
+    pub result: T
 }
 
 pub trait JsonRpcApi: ApiBase {
@@ -34,9 +51,9 @@ pub trait JsonRpcApi: ApiBase {
             None => HashMap::new()
         };
         headers_call.insert("Content-Type", "application/json;charset=UTF-8");
-        let base_url = format!("{}://{}:{}/{}", self.get_core().get_protocol(), self.get_core().get_host(), self.get_core().get_port(), ep);
-        let body_string = serde_json::to_string(&params_call).unwrap();
-        self.get_core().post(&base_url, Body::from(body_string), headers_call)
+        let base_url = format!("{}://{}:{}{}", self.get_core().get_protocol(), self.get_core().get_host(), self.get_core().get_port(), ep);
+        let body_string = serde_json::to_vec(&params_call).unwrap();
+        self.get_core().post(&base_url, body_string.into(), headers_call)
         //TODO: Add error handling
     }
 }

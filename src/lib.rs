@@ -1,10 +1,10 @@
 pub mod apis;
-pub mod avalanche;
+pub mod avalanche_core;
 pub mod errors;
 pub mod utils;
 pub mod common;
 
-use crate::avalanche::AvalancheCore;
+use crate::avalanche_core::AvalancheCore;
 use crate::errors::AvalancheError;
 use crate::utils::constants::{DEFAULT_NETWORK_ID, NETWORK};
 use crate::utils::helper_functions::get_preferred_hrp;
@@ -15,9 +15,10 @@ use regex::Regex;
 use std::collections::HashMap;
 use std::str::FromStr;
 use url::Url;
+use hyper_tls::HttpsConnector;
 
 #[derive(Debug, Clone, Default)]
-struct Avalanche {
+pub struct Avalanche {
     network_id: u16,
     hrp: String,
     protocol: String,
@@ -39,12 +40,12 @@ impl Avalanche {
         x_chain_id: Option<&str>,
         c_chain_id: Option<&str>,
         hrp: Option<&str>,
-        skip_init: bool,
+        _skip_init: bool,
     ) -> Result<Avalanche, AvalancheError> {
         let mut avalanche = Avalanche::default();
         avalanche.set_address(host, port, protocol)?;
         let network_id_resolved = network_id.unwrap_or(DEFAULT_NETWORK_ID);
-        let x_chain_final = match x_chain_id {
+        let _x_chain_final = match x_chain_id {
             Some(x_chain_id_resolved) => {
                 x_chain_id_resolved
             }
@@ -56,7 +57,7 @@ impl Avalanche {
                 }
             }
         };
-        let c_chain_final = match x_chain_id {
+        let _c_chain_final = match c_chain_id {
             Some(c_chain_id_resolved) => {
                 c_chain_id_resolved
             }
@@ -130,7 +131,12 @@ impl Avalanche {
             .body(post_data)
             .expect("request builder");
         request = self.set_header(request, headers);
-        Client::new().request(request)
+        let https = HttpsConnector::new();
+        if self.get_protocol() == "http" {
+            Client::new().request(request)
+        } else {
+            Client::builder().build::<_, hyper::Body>(https).request(request)
+        }
     }
 }
 
@@ -148,6 +154,9 @@ impl AvalancheCore for Avalanche {
         if !protocols.contains(&protocol_defined) {
             return Err(AvalancheError);
         }
+        self.host = host.clone();
+        self.port = port;
+        self.protocol = protocol_defined.to_string();
         self.url = format!("{}://{}:{}", &protocol_defined, &host, &port);
         Ok(())
     }
