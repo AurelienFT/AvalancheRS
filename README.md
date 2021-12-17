@@ -13,6 +13,9 @@ This crate is designed as AvalancheJS and so here is a list of all APIs and thei
 
 ### Developed:
 
+### Work In Progress:
+- Info API
+
 ### Not developed yet:
 
 - Admin API 
@@ -20,7 +23,6 @@ This crate is designed as AvalancheJS and so here is a list of all APIs and thei
 - AVM API (X-Chain)
 - EVM API (C-Chain)
 - Health API
-- Info API
 - Keystore API
 - Metrics API
 - PlatformVM API (P-Chain)
