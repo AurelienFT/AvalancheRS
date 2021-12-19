@@ -1,7 +1,6 @@
 use crate::common::api_base::ApiBase;
 use std::collections::HashMap;
 use hyper::client::{ResponseFuture};
-use crate::avalanche_core::AvalancheCore;
 use serde::{Serialize, Serializer, Deserialize};
 
 #[derive(Deserialize, Clone)]
@@ -25,6 +24,19 @@ impl Serialize for JsonRpcParams {
 }
 
 #[derive(Serialize, Deserialize)]
+pub struct JsonRpcError {
+    pub jsonrpc: String,
+    pub id: String,
+    pub error: JsonRpcSubError
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct JsonRpcSubError {
+    pub code: i32,
+    pub message: String,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct JsonRpcResponse<T> {
     pub jsonrpc: String,
     pub id: String,
@@ -35,15 +47,12 @@ pub trait JsonRpcApi: ApiBase {
     fn get_json_rpc_version(&self) -> String;
     fn get_json_rpc_id(&self) -> u32;
     fn call_method(&self, method: String, params: Option<HashMap<String, JsonRpcParams>>, base_api_url: Option<&str>, headers: Option<HashMap<&str, &str>>) -> ResponseFuture {
-        let ep = base_api_url.unwrap_or(self.get_api_base_url());
+        let ep = base_api_url.unwrap_or_else(|| self.get_api_base_url());
         let mut params_call: HashMap<&str, JsonRpcParams> = HashMap::new();
         params_call.insert("id", JsonRpcParams::String(self.get_json_rpc_id().to_string()));
         params_call.insert("method", JsonRpcParams::String(method));
-        match params {
-            Some(p) => {
-                params_call.insert("params", JsonRpcParams::HashMap(p));
-            },
-            None => {}
+        if let Some(p) = params {
+            params_call.insert("params", JsonRpcParams::HashMap(p));
         }
         if self.get_json_rpc_version() != "1.0" {
             params_call.insert("jsonrpc", JsonRpcParams::String(self.get_json_rpc_version()));

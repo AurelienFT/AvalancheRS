@@ -4,11 +4,11 @@ use lazy_static::lazy_static;
 use std::ops::{Div, Mul};
 use crate::apis::evm::constants::{X, P, C, EnumNetwork, Network};
 
-pub const PRIVATE_KEY_PREFIX: &'static str = "PrivateKey-";
-pub const NODE_ID_PREFIX: &'static str = "NodeID-";
-pub const PRIMARY_ASSET_ALIAS: &'static str = "AVAX";
-pub const MAINNET_API: &'static str = "api.avax.network";
-pub const FUJI_API: &'static str = "api.avax-test.network";
+pub const PRIVATE_KEY_PREFIX: &str = "PrivateKey-";
+pub const NODE_ID_PREFIX: &str = "NodeID-";
+pub const PRIMARY_ASSET_ALIAS: &str = "AVAX";
+pub const MAINNET_API: &str = "api.avax.network";
+pub const FUJI_API: &str = "api.avax-test.network";
 
 lazy_static! {
   pub static ref NETWORK_ID_TO_HRP: HashMap<u16, &'static str> = {
@@ -62,26 +62,26 @@ lazy_static! {
   };
 }
 
-pub const FALLBACK_HRP: &'static str = "custom";
-pub const FALLBACK_NETWORK_NAME: &'static str = "Custom Network";
+pub const FALLBACK_HRP: &str = "custom";
+pub const FALLBACK_NETWORK_NAME: &str = "Custom Network";
 pub const FALLBACK_EVM_CHAIN_ID: u16 = 43112;
 
 pub const DEFAULT_NETWORK_ID: u16 = 1;
 
-pub const PLATFORM_CHAIN_ID: &'static str = "11111111111111111111111111111111LpoYY";
-pub const PRIMARY_NETWORK_ID: &'static str = "11111111111111111111111111111111LpoYY";
+pub const PLATFORM_CHAIN_ID: &str = "11111111111111111111111111111111LpoYY";
+pub const PRIMARY_NETWORK_ID: &str = "11111111111111111111111111111111LpoYY";
 
-pub const X_CHAIN_ALIAS: &'static str = "X";
-pub const C_CHAIN_ALIAS: &'static str = "C";
-pub const P_CHAIN_ALIAS: &'static str = "P";
-pub const X_CHAIN_VM_NAME: &'static str = "avm";
-pub const C_CHAIN_VM_NAME: &'static str = "evm";
-pub const P_CHAIN_VM_NAME: &'static str = "platformvm";
+pub const X_CHAIN_ALIAS: &str = "X";
+pub const C_CHAIN_ALIAS: &str = "C";
+pub const P_CHAIN_ALIAS: &str = "P";
+pub const X_CHAIN_VM_NAME: &str = "avm";
+pub const C_CHAIN_VM_NAME: &str = "evm";
+pub const P_CHAIN_VM_NAME: &str = "platformvm";
 
-pub const DEFAULT_LOCAL_GENESIS_PRIVATE_KEY: &'static str = "ewoqjP7PxY4yr3iLTpLisriqt94hdyDFNgchSxGGztUrTXtNN";
-pub const DEFAULT_EVM_LOCAL_GENESIS_PRIVATE_KEY: &'static str = "0x56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027";
-pub const DEFAULT_EVM_LOCAL_GENESIS_ADDRESS: &'static str = "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC";
-pub const MNEMONIC: &'static str = "output tooth keep tooth bracket fox city sustain blood raise install pond stem reject long scene clap gloom purpose mean music piece unknown light";
+pub const DEFAULT_LOCAL_GENESIS_PRIVATE_KEY: &str = "ewoqjP7PxY4yr3iLTpLisriqt94hdyDFNgchSxGGztUrTXtNN";
+pub const DEFAULT_EVM_LOCAL_GENESIS_PRIVATE_KEY: &str = "0x56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027";
+pub const DEFAULT_EVM_LOCAL_GENESIS_ADDRESS: &str = "0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC";
+pub const MNEMONIC: &str = "output tooth keep tooth bracket fox city sustain blood raise install pond stem reject long scene clap gloom purpose mean music piece unknown light";
 
 
 lazy_static! {
@@ -173,7 +173,7 @@ lazy_static! {
 }
 
 // Start mainnet
-pub const AVAX_ASSET_ID_MAINNET: &'static str = "FvwEAhmxKfeiG8SnEvq42hc6whRyY3EFYAvebMqDNDGCgxN5Z";
+pub const AVAX_ASSET_ID_MAINNET: &str = "FvwEAhmxKfeiG8SnEvq42hc6whRyY3EFYAvebMqDNDGCgxN5Z";
 
 lazy_static! {
   pub static ref N_1X: X = X {
@@ -363,7 +363,7 @@ lazy_static! {
   // End Everest
 }
 
-const AVAX_ASSET_ID_FUJI: &'static str = "U8iRqJoiJm8xZHAacmvYyZVwqQx6uDNtQeP3CQ6fcgQk3JqnK";
+const AVAX_ASSET_ID_FUJI: &str = "U8iRqJoiJm8xZHAacmvYyZVwqQx6uDNtQeP3CQ6fcgQk3JqnK";
 
 lazy_static! {
   // Start Fuji
@@ -417,7 +417,7 @@ lazy_static! {
   // End Fuji
 }
 
-const AVAX_ASSET_ID_LOCAL_NETWORK: &'static str = "2fombhL7aGPwj3KH4bfrmJwW6PVnMobf9Y2fn9GwxiAAJyFDbe";
+const AVAX_ASSET_ID_LOCAL_NETWORK: &str = "2fombhL7aGPwj3KH4bfrmJwW6PVnMobf9Y2fn9GwxiAAJyFDbe";
 
 lazy_static! {
   //Start Local Network
@@ -462,7 +462,7 @@ lazy_static! {
   pub static ref NETWORK: HashMap<u16, Network> = {
     let mut m = HashMap::new();
 
-    let mut addresses_0: HashMap<&'static str, EnumNetwork> = HashMap::new();
+    let mut addresses_0: HashMap<&str, EnumNetwork> = HashMap::new();
     addresses_0.insert("2vrXWHgGxh5n3YsLHMV16YVVJTpT4z45Fmb4y3bL6si8kLCyg9", EnumNetwork::X((*N_0X).clone()));
     addresses_0.insert("11111111111111111111111111111111LpoYY", EnumNetwork::P((*N_0P).clone()));
     addresses_0.insert("2fFZQibQXcd6LTE4rpBPBAkLVXFE91Kit8pgxaBG1mRnh5xqbb", EnumNetwork::C((*N_0C).clone()));
@@ -474,7 +474,7 @@ lazy_static! {
       addresses: addresses_0,
     });
 
-    let mut addresses_1: HashMap<&'static str, EnumNetwork> = HashMap::new();
+    let mut addresses_1: HashMap<&str, EnumNetwork> = HashMap::new();
     addresses_1.insert("2oYMBNV4eNHyqk2fjjV5nVQLDbtmNJzq5s3qs3Lo6ftnC6FByM", EnumNetwork::X((*N_1X).clone()));
     addresses_1.insert("11111111111111111111111111111111LpoYY", EnumNetwork::P((*N_1P).clone()));
     addresses_1.insert("2q9e4r6Mu3U68nU1fYjgbR6JvwrRx36CohpAX5UQxse55x1Q5", EnumNetwork::C((*N_1C).clone()));
@@ -486,7 +486,7 @@ lazy_static! {
       addresses: addresses_1,
     });
 
-    let mut addresses_2: HashMap<&'static str, EnumNetwork> = HashMap::new();
+    let mut addresses_2: HashMap<&str, EnumNetwork> = HashMap::new();
     addresses_2.insert("4ktRjsAKxgMr2aEzv9SWmrU7Xk5FniHUrVCX4P1TZSfTLZWFM", EnumNetwork::X((*N_2X).clone()));
     addresses_2.insert("11111111111111111111111111111111LpoYY", EnumNetwork::P((*N_2P).clone()));
     addresses_2.insert("2mUYSXfLrDtigwbzj1LxKVsHwELghc5sisoXrzJwLqAAQHF4i", EnumNetwork::C((*N_2C).clone()));
@@ -498,7 +498,7 @@ lazy_static! {
       addresses: addresses_2,
     });
 
-    let mut addresses_3: HashMap<&'static str, EnumNetwork> = HashMap::new();
+    let mut addresses_3: HashMap<&str, EnumNetwork> = HashMap::new();
     addresses_3.insert("rrEWX7gc7D9mwcdrdBxBTdqh1a7WDVsMuadhTZgyXfFcRz45L", EnumNetwork::X((*N_3X).clone()));
     addresses_3.insert("11111111111111111111111111111111LpoYY", EnumNetwork::P((*N_3P).clone()));
     addresses_3.insert("zJytnh96Pc8rM337bBrtMvJDbEdDNjcXG3WkTNCiLp18ergm9", EnumNetwork::C((*N_3C).clone()));
@@ -510,7 +510,7 @@ lazy_static! {
       addresses: addresses_3,
     });
 
-    let mut addresses_4: HashMap<&'static str, EnumNetwork> = HashMap::new();
+    let mut addresses_4: HashMap<&str, EnumNetwork> = HashMap::new();
     addresses_4.insert("jnUjZSRt16TcRnZzmh5aMhavwVHz3zBrSN8GfFMTQkzUnoBxC", EnumNetwork::X((*N_4X).clone()));
     addresses_4.insert("11111111111111111111111111111111LpoYY", EnumNetwork::P((*N_4P).clone()));
     addresses_4.insert("saMG5YgNsFxzjz4NMkEkt3bAH6hVxWdZkWcEnGB3Z15pcAmsK", EnumNetwork::C((*N_4C).clone()));
@@ -522,7 +522,7 @@ lazy_static! {
       addresses: addresses_4,
     });
 
-    let mut addresses_5: HashMap<&'static str, EnumNetwork> = HashMap::new();
+    let mut addresses_5: HashMap<&str, EnumNetwork> = HashMap::new();
     addresses_5.insert("2JVSBoinj9C2J33VntvzYtVJNZdN2NKiwwKjcumHUWEb5DbBrm", EnumNetwork::X((*N_5X).clone()));
     addresses_5.insert("11111111111111111111111111111111LpoYY", EnumNetwork::P((*N_5P).clone()));
     addresses_5.insert("yH8D7ThNJkxmtkuv2jgBa4P1Rn3Qpr4pPr7QYNfcdoS6k6HWp", EnumNetwork::C((*N_5C).clone()));
@@ -534,7 +534,7 @@ lazy_static! {
       addresses: addresses_5,
     });
 
-    let mut addresses_12345: HashMap<&'static str, EnumNetwork> = HashMap::new();
+    let mut addresses_12345: HashMap<&str, EnumNetwork> = HashMap::new();
     addresses_12345.insert("2eNy1mUFdmaxXNj1eQHUe7Np4gju9sJsEtWQ4MX3ToiNKuADed", EnumNetwork::X((*N_12345X).clone()));
     addresses_12345.insert("11111111111111111111111111111111LpoYY", EnumNetwork::P((*N_12345P).clone()));
     addresses_12345.insert("2eNy1mUFdmaxXNj1eQHUe7Np4gju9sJsEtWQ4MX3ToiNKuADed", EnumNetwork::C((*N_12345C).clone()));

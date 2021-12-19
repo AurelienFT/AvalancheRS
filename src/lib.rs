@@ -8,6 +8,7 @@ use crate::avalanche_core::AvalancheCore;
 use crate::errors::AvalancheError;
 use crate::utils::constants::{DEFAULT_NETWORK_ID, NETWORK};
 use crate::utils::helper_functions::get_preferred_hrp;
+use crate::common::api_base::ApiBase;
 use hyper::client::ResponseFuture;
 use hyper::header::{HeaderName, HeaderValue};
 use hyper::{Body, Client, Method, Request};
@@ -17,7 +18,7 @@ use std::str::FromStr;
 use url::Url;
 use hyper_tls::HttpsConnector;
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Default)]
 pub struct Avalanche {
     network_id: u16,
     hrp: String,
@@ -28,8 +29,10 @@ pub struct Avalanche {
     url: String,
     headers: HashMap<String, String>,
     auth: Option<String>,
+    apis: HashMap<String, Box<dyn ApiBase>>
 }
 
+#[allow(clippy::too_many_arguments)]
 impl Avalanche {
     // TODO: Maybe change to a builder ?
     pub fn new(
@@ -40,10 +43,10 @@ impl Avalanche {
         x_chain_id: Option<&str>,
         c_chain_id: Option<&str>,
         hrp: Option<&str>,
-        _skip_init: bool,
+        skip_init: bool,
     ) -> Result<Avalanche, AvalancheError> {
         let mut avalanche = Avalanche::default();
-        avalanche.set_address(host, port, protocol)?;
+        avalanche.set_address(host.clone(), port, protocol)?;
         let network_id_resolved = network_id.unwrap_or(DEFAULT_NETWORK_ID);
         let _x_chain_final = match x_chain_id {
             Some(x_chain_id_resolved) => {
@@ -83,6 +86,18 @@ impl Avalanche {
                 avalanche.hrp = get_preferred_hrp(Some(avalanche.network_id)).to_string();
             }
         };
+        if !skip_init {
+            avalanche.add_api(String::from("info"), Box::new(apis::info::InfoAPI::new(Box::new(Avalanche::new(
+                host,
+                port,
+                protocol,
+                Some(avalanche.network_id),
+                Some(_x_chain_final),
+                Some(_c_chain_final),
+                Some(&avalanche.hrp),
+                true,
+            )?))));
+        }
         Ok(avalanche)
     }
     fn set_header(
@@ -102,14 +117,11 @@ impl Avalanche {
                 HeaderValue::from_str(value).unwrap(),
             );
         }
-        match self.auth {
-            Some(ref token) => {
-                request.headers_mut().insert(
-                    HeaderName::from_str("Authorization").unwrap(),
-                    HeaderValue::from_str(&format!("Bearer {}", token)).unwrap(),
-                );
-            }
-            None => {}
+        if let Some(ref token) = self.auth {
+            request.headers_mut().insert(
+                HeaderName::from_str("Authorization").unwrap(),
+                HeaderValue::from_str(&format!("Bearer {}", token)).unwrap(),
+            );
         }
         request
     }
@@ -138,6 +150,11 @@ impl Avalanche {
             Client::builder().build::<_, hyper::Body>(https).request(request)
         }
     }
+    pub fn info(&self) -> Result<&Box<dyn ApiBase>, AvalancheError> {
+        self.apis.get("info").ok_or(AvalancheError::ApiNotInitialized {
+            api: String::from("info")
+        })
+    }
 }
 
 impl AvalancheCore for Avalanche {
@@ -152,7 +169,7 @@ impl AvalancheCore for Avalanche {
         let protocol_defined: &str = protocol.unwrap_or("http");
         let protocols: Vec<&str> = vec!["http", "https"];
         if !protocols.contains(&protocol_defined) {
-            return Err(AvalancheError);
+            return Err(AvalancheError::BadProtocol);
         }
         self.host = host.clone();
         self.port = port;
@@ -227,6 +244,9 @@ impl AvalancheCore for Avalanche {
     }
     fn patch(&self, url: &str, post_data: Body, headers: HashMap<&str, &str>) -> ResponseFuture {
         self.request(url, Method::PATCH, HashMap::new(), post_data, headers)
+    }
+    fn add_api(&mut self, api_name: String, api: Box<dyn ApiBase>) {
+        self.apis.insert(api_name, api);
     }
 }
 

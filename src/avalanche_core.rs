@@ -2,6 +2,7 @@ use crate::errors::{AvalancheError};
 use std::collections::HashMap;
 use hyper::{Body};
 use hyper::client::{ResponseFuture};
+use crate::common::api_base::ApiBase;
 
 pub trait AvalancheCore {
     fn set_address(&mut self, host: String, port: u32, protocol: Option<&str>) -> Result<(), AvalancheError>;
@@ -24,4 +25,5 @@ pub trait AvalancheCore {
     fn post(&self, url: &str, post_data: Body, headers: HashMap<&str, &str>) -> ResponseFuture;
     fn put(&self, url: &str, post_data: Body, headers: HashMap<&str, &str>) -> ResponseFuture;
     fn patch(&self, url: &str, post_data: Body, headers: HashMap<&str, &str>) -> ResponseFuture;
+    fn add_api(&mut self, api_name: String, api: Box<dyn ApiBase>);
 }
