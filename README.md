@@ -12,9 +12,10 @@ This library is still a WIP.
 This crate is designed as AvalancheJS and so here is a list of all APIs and their status of developing : 
 
 ### Developed:
+- Info API
 
 ### Work In Progress:
-- Info API
+- Health API
 
 ### Not developed yet:
 
@@ -22,7 +23,6 @@ This crate is designed as AvalancheJS and so here is a list of all APIs and thei
 - Auth API
 - AVM API (X-Chain)
 - EVM API (C-Chain)
-- Health API
 - Keystore API
 - Metrics API
 - PlatformVM API (P-Chain)
