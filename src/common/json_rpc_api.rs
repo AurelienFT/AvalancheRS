@@ -4,10 +4,11 @@ use hyper::client::{ResponseFuture};
 use crate::avalanche_core::AvalancheCore;
 use serde::{Serialize, Serializer, Deserialize};
 
-#[derive(Deserialize)]
-enum JsonRpcParams {
+#[derive(Deserialize, Clone)]
+pub enum JsonRpcParams {
     String(String),
-    HashMap(HashMap<String, String>),
+    HashMap(HashMap<String, JsonRpcParams>),
+    VecString(Vec<String>)
 }
 
 impl Serialize for JsonRpcParams {
@@ -18,6 +19,7 @@ impl Serialize for JsonRpcParams {
         match self {
             JsonRpcParams::String(s) => s.serialize(serializer),
             JsonRpcParams::HashMap(h) => h.serialize(serializer),
+            JsonRpcParams::VecString(vs) => vs.serialize(serializer),
         }
     }
 }
@@ -32,7 +34,7 @@ pub struct JsonRpcResponse<T> {
 pub trait JsonRpcApi: ApiBase {
     fn get_json_rpc_version(&self) -> String;
     fn get_json_rpc_id(&self) -> u32;
-    fn call_method(&self, method: String, params: Option<HashMap<String, String>>, base_api_url: Option<&str>, headers: Option<HashMap<&str, &str>>) -> ResponseFuture {
+    fn call_method(&self, method: String, params: Option<HashMap<String, JsonRpcParams>>, base_api_url: Option<&str>, headers: Option<HashMap<&str, &str>>) -> ResponseFuture {
         let ep = base_api_url.unwrap_or(self.get_api_base_url());
         let mut params_call: HashMap<&str, JsonRpcParams> = HashMap::new();
         params_call.insert("id", JsonRpcParams::String(self.get_json_rpc_id().to_string()));
