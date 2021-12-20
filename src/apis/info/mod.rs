@@ -9,7 +9,6 @@ use crate::common::json_rpc_api::{JsonRpcApi, JsonRpcResponse, JsonRpcParams, de
 use num_bigint::BigInt;
 use std::str::FromStr;
 
-// TODO: Be able to store any AvalancheCore
 pub struct InfoAPI {
     core: Box<dyn AvalancheCore>,
     cache: CLruCache<String, String>
