@@ -5,7 +5,7 @@ use std::num::NonZeroUsize;
 use std::collections::HashMap;
 use crate::errors::AvalancheError;
 use serde::{Serialize, Deserialize};
-use crate::common::json_rpc_api::{JsonRpcApi, JsonRpcResponse, JsonRpcError, JsonRpcParams};
+use crate::common::json_rpc_api::{JsonRpcApi, JsonRpcResponse, JsonRpcParams, decode_json_rpc_body};
 use num_bigint::BigInt;
 use std::str::FromStr;
 
@@ -128,86 +128,37 @@ impl InfoAPI {
         params.insert(String::from("alias"), JsonRpcParams::String(String::from(alias)));
         let response = self.call_method(String::from("info.getBlockchainID"), Some(params.clone()), None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
-        let response_formatted: JsonRpcResponse<ResponseJRPCGetBlockchainID> = match serde_json::from_slice::<JsonRpcResponse<ResponseJRPCGetBlockchainID>>(body) {
-            Ok(response) => response,
-            Err(_) => {
-                let response = serde_json::from_slice::<JsonRpcError>(body).unwrap();
-                return Err(AvalancheError::ErrorJsonRpcCall{
-                    call: String::from("info.getBlockchainID"),
-                    code: response.error.code.to_string(),
-                    message: response.error.message
-                });
-            }
-        };
+        let response_formatted: JsonRpcResponse<ResponseJRPCGetBlockchainID> = decode_json_rpc_body("info.getBlockchainID", body)?;
         Ok(response_formatted.result.blockchain_id)
     }
     pub async fn get_network_id(&self) -> Result<i32, AvalancheError> {
         let response = self.call_method(String::from("info.getNetworkID"), None, None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
-        let response_formatted: JsonRpcResponse<ResponseJRPCGetNetworkID> = match serde_json::from_slice::<JsonRpcResponse<ResponseJRPCGetNetworkID>>(body) {
-            Ok(response) => response,
-            Err(_) => {
-                let response = serde_json::from_slice::<JsonRpcError>(body).unwrap();
-                return Err(AvalancheError::ErrorJsonRpcCall{
-                    call: String::from("info.getNetworkID"),
-                    code: response.error.code.to_string(),
-                    message: response.error.message
-                });
-            }
-        };
+        let response_formatted: JsonRpcResponse<ResponseJRPCGetNetworkID> = decode_json_rpc_body("info.getNetworkID", body)?;
         Ok(response_formatted.result.network_id.parse::<i32>().unwrap())
     }
     pub async fn get_network_name(&self) -> Result<String, AvalancheError> {
         let response = self.call_method(String::from("info.getNetworkName"), None, None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
-        let response_formatted: JsonRpcResponse<ResponseJRPCGetNetworkName> = match serde_json::from_slice::<JsonRpcResponse<ResponseJRPCGetNetworkName>>(body) {
-            Ok(response) => response,
-            Err(_) => {
-                let response = serde_json::from_slice::<JsonRpcError>(body).unwrap();
-                return Err(AvalancheError::ErrorJsonRpcCall{
-                    call: String::from("info.getNetworkName"),
-                    code: response.error.code.to_string(),
-                    message: response.error.message
-                });
-            }
-        };
+        let response_formatted: JsonRpcResponse<ResponseJRPCGetNetworkName> = decode_json_rpc_body("info.getNetworkName", body)?;
         Ok(response_formatted.result.network_name)
     }
     pub async fn get_node_id(&self) -> Result<String, AvalancheError> {
         let response = self.call_method(String::from("info.getNodeID"), None, None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
-        let response_formatted: JsonRpcResponse<ResponseJRPCGetNodeID> = match serde_json::from_slice::<JsonRpcResponse<ResponseJRPCGetNodeID>>(body) {
-            Ok(response) => response,
-            Err(_) => {
-                let response = serde_json::from_slice::<JsonRpcError>(body).unwrap();
-                return Err(AvalancheError::ErrorJsonRpcCall{
-                    call: String::from("info.getNodeID"),
-                    code: response.error.code.to_string(),
-                    message: response.error.message
-                });
-            }
-        };
+        let response_formatted: JsonRpcResponse<ResponseJRPCGetNodeID> = decode_json_rpc_body("info.getNodeID", body)?;
         Ok(response_formatted.result.node_id)
     }
     pub async fn get_node_version(&self) -> Result<String, AvalancheError> {
         let response = self.call_method(String::from("info.getNodeVersion"), None, None, None).await?;
-        let response_formatted: JsonRpcResponse<ResponseJRPCGetNodeVersion> = serde_json::from_slice(&hyper::body::to_bytes(response.into_body()).await?).unwrap();
+        let body = &hyper::body::to_bytes(response.into_body()).await?;
+        let response_formatted: JsonRpcResponse<ResponseJRPCGetNodeVersion> = decode_json_rpc_body("info.getNodeVersion", body)?;
         Ok(response_formatted.result.version)
     }
     pub async fn get_tx_fee(&self) -> Result<ResponseGetTxFee, AvalancheError> {
         let response = self.call_method(String::from("info.getTxFee"), None, None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
-        let response_formatted: JsonRpcResponse<ResponseJRPCGetTxFee> = match serde_json::from_slice::<JsonRpcResponse<ResponseJRPCGetTxFee>>(body) {
-            Ok(response) => response,
-            Err(_) => {
-                let response = serde_json::from_slice::<JsonRpcError>(body).unwrap();
-                return Err(AvalancheError::ErrorJsonRpcCall{
-                    call: String::from("info.getTxFee"),
-                    code: response.error.code.to_string(),
-                    message: response.error.message
-                });
-            }
-        };
+        let response_formatted: JsonRpcResponse<ResponseJRPCGetTxFee> = decode_json_rpc_body("info.getTxFee", body)?;
         Ok(
             ResponseGetTxFee {
                 tx_fee: BigInt::from_str(&response_formatted.result.tx_fee).unwrap(),
@@ -220,17 +171,7 @@ impl InfoAPI {
         params.insert(String::from("chain"), JsonRpcParams::String(String::from(chain)));
         let response = self.call_method(String::from("info.isBootstrapped"), Some(params.clone()), None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
-        let response_formatted: JsonRpcResponse<ResponseJRPCIsBootstrapped> = match serde_json::from_slice::<JsonRpcResponse<ResponseJRPCIsBootstrapped>>(body) {
-            Ok(response) => response,
-            Err(_) => {
-                let response = serde_json::from_slice::<JsonRpcError>(body).unwrap();
-                return Err(AvalancheError::ErrorJsonRpcCall{
-                    call: String::from("info.isBootstrapped"),
-                    code: response.error.code.to_string(),
-                    message: response.error.message
-                });
-            }
-        };
+        let response_formatted: JsonRpcResponse<ResponseJRPCIsBootstrapped> = decode_json_rpc_body("info.isBootstrapped", body)?;
         Ok(response_formatted.result.is_bootstrapped)
     }
     pub async fn peers(&self, node_ids: Option<Vec<String>>) -> Result<Vec<ResponsePeers>, AvalancheError> {
@@ -238,33 +179,13 @@ impl InfoAPI {
         params.insert(String::from("chain"), JsonRpcParams::VecString(node_ids.unwrap_or_default()));
         let response = self.call_method(String::from("info.peers"), Some(params.clone()), None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
-        let response_formatted: JsonRpcResponse<ResponseJRPCPeers> = match serde_json::from_slice::<JsonRpcResponse<ResponseJRPCPeers>>(body) {
-            Ok(response) => response,
-            Err(_) => {
-                let response = serde_json::from_slice::<JsonRpcError>(body).unwrap();
-                return Err(AvalancheError::ErrorJsonRpcCall{
-                    call: String::from("info.peers"),
-                    code: response.error.code.to_string(),
-                    message: response.error.message
-                });
-            }
-        };
+        let response_formatted: JsonRpcResponse<ResponseJRPCPeers> = decode_json_rpc_body("info.peers", body)?;
         Ok(response_formatted.result.peers)
     }
     pub async fn uptime(&self) -> Result<ResponseUptime, AvalancheError> {
         let response = self.call_method(String::from("info.uptime"), None, None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
-        let response_formatted: JsonRpcResponse<ResponseUptime> = match serde_json::from_slice::<JsonRpcResponse<ResponseUptime>>(body) {
-            Ok(response) => response,
-            Err(_) => {
-                let response = serde_json::from_slice::<JsonRpcError>(body).unwrap();
-                return Err(AvalancheError::ErrorJsonRpcCall{
-                    call: String::from("info.uptime"),
-                    code: response.error.code.to_string(),
-                    message: response.error.message
-                });
-            }
-        };
+        let response_formatted: JsonRpcResponse<ResponseUptime> = decode_json_rpc_body("info.uptime", body)?;
         Ok(response_formatted.result)
     }
 }

@@ -1,4 +1,5 @@
 use crate::common::api_base::ApiBase;
+use crate::AvalancheError;
 use std::collections::HashMap;
 use hyper::client::{ResponseFuture};
 use serde::{Serialize, Serializer, Deserialize};
@@ -66,5 +67,22 @@ pub trait JsonRpcApi: ApiBase {
         let body_string = serde_json::to_vec(&params_call).unwrap();
         self.get_core().post(&base_url, body_string.into(), headers_call)
         //TODO: Add error handling
+    }
+}
+
+pub fn decode_json_rpc_body<T>(call_name: &str, body: &hyper::body::Bytes) -> Result<JsonRpcResponse<T>, AvalancheError>
+where 
+    T: serde::de::DeserializeOwned
+    {
+    match serde_json::from_slice::<JsonRpcResponse<T>>(body) {
+        Ok(response) => Ok(response),
+        Err(_) => {
+            let response = serde_json::from_slice::<JsonRpcError>(body).unwrap();
+            Err(AvalancheError::ErrorJsonRpcCall{
+                call: String::from(call_name),
+                code: response.error.code.to_string(),
+                message: response.error.message
+            })
+        }
     }
 }
