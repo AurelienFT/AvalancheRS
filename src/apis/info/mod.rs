@@ -219,7 +219,7 @@ mod tests {
     async fn get_node_version_works() {
         let avalanche = Avalanche::new(String::from(crate::utils::constants::MAINNET_API), 443, Some("https"), None, None, None, None, false).unwrap();
         let info_api: InfoAPI = InfoAPI::new(Box::new(avalanche));
-        assert_eq!(info_api.get_node_version().await.unwrap(), "avalanche/1.7.2");
+        assert_eq!(info_api.get_node_version().await.unwrap(), "avalanche/1.7.3");
     }
 
     #[tokio::test]
