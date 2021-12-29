@@ -9,19 +9,19 @@ use crate::common::json_rpc_api::{JsonRpcApi, JsonRpcResponse, JsonRpcParams, de
 use num_bigint::BigInt;
 use std::str::FromStr;
 
-pub struct InfoAPI {
-    core: Box<dyn AvalancheCore>,
+pub struct InfoAPI<'a> {
+    core: Box<dyn AvalancheCore<'a>>,
     cache: CLruCache<String, String>
 }
 
-impl ApiBase for InfoAPI {
+impl<'a> ApiBase<'a> for InfoAPI<'a> {
     fn get_api_base_url(&self) -> &str {
         "/ext/info"
     }
     fn get_cache(&self) -> &CLruCache<String, String> {
         &self.cache
     }
-    fn get_core(&self) -> Box<&dyn AvalancheCore> {
+    fn get_core(&self) -> Box<&dyn AvalancheCore<'a>> {
         Box::new(&(*self.core))
     }
 }
@@ -104,7 +104,7 @@ pub struct ResponseUptime {
     pub weighted_average_percentage: String
 }
 
-impl JsonRpcApi for InfoAPI {
+impl<'a> JsonRpcApi<'a> for InfoAPI<'a> {
     fn get_json_rpc_version(&self) -> String {
         String::from("2.0")
     }
@@ -115,8 +115,8 @@ impl JsonRpcApi for InfoAPI {
 }
 
 //TODO: Better error management
-impl InfoAPI {
-    pub fn new(core: Box<dyn AvalancheCore>) -> InfoAPI {
+impl<'a> InfoAPI<'a> {
+    pub fn new(core: Box<dyn AvalancheCore<'a>>) -> InfoAPI<'a> {
         InfoAPI {
             core,
             cache: CLruCache::new(NonZeroUsize::new(2).unwrap())
@@ -125,7 +125,7 @@ impl InfoAPI {
     pub async fn get_blockchain_id(&self, alias: &str) -> Result<String, AvalancheError> {
         let mut params = HashMap::new();
         params.insert(String::from("alias"), JsonRpcParams::String(String::from(alias)));
-        let response = self.call_method(String::from("info.getBlockchainID"), Some(params.clone()), None, None).await?;
+        let response = self.call_method(String::from("info.getBlockchainID"), Some(params), None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
         let response_formatted: JsonRpcResponse<ResponseJRPCGetBlockchainID> = decode_json_rpc_body("info.getBlockchainID", body)?;
         Ok(response_formatted.result.blockchain_id)
@@ -168,7 +168,7 @@ impl InfoAPI {
     pub async fn is_bootstrapped(&self, chain: &str) -> Result<bool, AvalancheError> {
         let mut params = HashMap::new();
         params.insert(String::from("chain"), JsonRpcParams::String(String::from(chain)));
-        let response = self.call_method(String::from("info.isBootstrapped"), Some(params.clone()), None, None).await?;
+        let response = self.call_method(String::from("info.isBootstrapped"), Some(params), None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
         let response_formatted: JsonRpcResponse<ResponseJRPCIsBootstrapped> = decode_json_rpc_body("info.isBootstrapped", body)?;
         Ok(response_formatted.result.is_bootstrapped)
@@ -176,7 +176,7 @@ impl InfoAPI {
     pub async fn peers(&self, node_ids: Option<Vec<String>>) -> Result<Vec<ResponsePeers>, AvalancheError> {
         let mut params = HashMap::new();
         params.insert(String::from("chain"), JsonRpcParams::VecString(node_ids.unwrap_or_default()));
-        let response = self.call_method(String::from("info.peers"), Some(params.clone()), None, None).await?;
+        let response = self.call_method(String::from("info.peers"), Some(params), None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
         let response_formatted: JsonRpcResponse<ResponseJRPCPeers> = decode_json_rpc_body("info.peers", body)?;
         Ok(response_formatted.result.peers)

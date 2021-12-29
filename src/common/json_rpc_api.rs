@@ -44,7 +44,7 @@ pub struct JsonRpcResponse<T> {
     pub result: T
 }
 
-pub trait JsonRpcApi: ApiBase {
+pub trait JsonRpcApi<'a>: ApiBase<'a> {
     fn get_json_rpc_version(&self) -> String;
     fn get_json_rpc_id(&self) -> u32;
     fn call_method(&self, method: String, params: Option<HashMap<String, JsonRpcParams>>, base_api_url: Option<&str>, headers: Option<HashMap<&str, &str>>) -> ResponseFuture {
@@ -59,7 +59,7 @@ pub trait JsonRpcApi: ApiBase {
             params_call.insert("jsonrpc", JsonRpcParams::String(self.get_json_rpc_version()));
         }
         let mut headers_call = match headers {
-            Some(h) => h.clone(),
+            Some(h) => h,
             None => HashMap::new()
         };
         headers_call.insert("Content-Type", "application/json;charset=UTF-8");

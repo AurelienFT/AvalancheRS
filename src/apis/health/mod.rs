@@ -7,24 +7,24 @@ use crate::errors::AvalancheError;
 use serde::{Serialize, Deserialize};
 use crate::common::json_rpc_api::{JsonRpcApi, JsonRpcResponse, JsonRpcParams, decode_json_rpc_body};
 
-pub struct HealthAPI {
-    core: Box<dyn AvalancheCore>,
+pub struct HealthAPI<'a> {
+    core: Box<dyn AvalancheCore<'a>>,
     cache: CLruCache<String, String>
 }
 
-impl ApiBase for HealthAPI {
+impl<'a> ApiBase<'a> for HealthAPI<'a> {
     fn get_api_base_url(&self) -> &str {
         "/ext/health"
     }
     fn get_cache(&self) -> &CLruCache<String, String> {
         &self.cache
     }
-    fn get_core(&self) -> Box<&dyn AvalancheCore> {
+    fn get_core(&self) -> Box<&dyn AvalancheCore<'a>> {
         Box::new(&(*self.core))
     }
 }
 
-impl JsonRpcApi for HealthAPI {
+impl<'a> JsonRpcApi<'a> for HealthAPI<'a> {
     fn get_json_rpc_version(&self) -> String {
         String::from("2.0")
     }
@@ -65,7 +65,7 @@ pub struct ResponseHealth {
     pub healthy: bool
 }
 
-impl HealthAPI {
+impl<'a> HealthAPI<'a> {
     pub fn new(core: Box<dyn AvalancheCore>) -> HealthAPI {
         HealthAPI {
             core,
@@ -75,7 +75,7 @@ impl HealthAPI {
     pub async fn health(&self, alias: &str) -> Result<ResponseHealth, AvalancheError> {
         let mut params = HashMap::new();
         params.insert(String::from("alias"), JsonRpcParams::String(String::from(alias)));
-        let response = self.call_method(String::from("health.health"), Some(params.clone()), None, None).await?;
+        let response = self.call_method(String::from("health.health"), Some(params), None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
         let response_formatted: JsonRpcResponse<ResponseHealth> = decode_json_rpc_body("health.health", body)?;
         Ok(response_formatted.result)
