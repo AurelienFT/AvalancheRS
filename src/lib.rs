@@ -142,6 +142,7 @@ impl Avalanche {
         post_data: Body,
         headers: HashMap<&str, &str>,
     ) -> ResponseFuture {
+        println!("{}", url);
         let mut uri = Url::parse(url).unwrap();
         for (key, value) in get_data.iter() {
             uri.query_pairs_mut().append_pair(key, value);
