@@ -20,36 +20,53 @@ use url::Url;
 use hyper_tls::HttpsConnector;
 
 #[derive(Debug, Default)]
-pub struct Avalanche<'a> {
+pub struct Avalanche {
     network_id: u16,
-    hrp: &'a str,
-    protocol: &'a str,
-    host: &'a str,
-    ip: &'a str,
+    hrp: &'static str,
+    protocol: &'static str,
+    host: &'static str,
+    ip: &'static str,
     port: u32,
-    url: &'a str,
+    url: String,
     headers: HashMap<String, String>,
     auth: Option<String>,
-    apis: HashMap<&'a str, Box<dyn ApiBase<'a>>>
+    apis: HashMap<&'static str, Box<dyn ApiBase>>
+}
+
+impl Clone for Avalanche {
+    fn clone(&self) -> Self {
+        Avalanche {
+            network_id: self.network_id,
+            hrp: self.hrp,
+            protocol: self.protocol,
+            host: self.host,
+            ip: self.ip,
+            port: self.port,
+            url: self.url.clone(),
+            headers: self.headers.clone(),
+            auth: self.auth.clone(),
+            apis: HashMap::new()
+        }
+    }
 }
 
 #[allow(clippy::too_many_arguments)]
-impl<'a> Avalanche<'a> {
+impl Avalanche {
     // TODO: Maybe change to a builder ?
     pub fn new(
-        host: String,
+        host: &'static str,
         port: u32,
-        protocol: Option<&'a str>,
+        protocol: Option<&'static str>,
         network_id: Option<u16>,
-        x_chain_id: Option<&'a str>,
-        c_chain_id: Option<&'a str>,
-        hrp: Option<&'a str>,
+        x_chain_id: Option<&'static str>,
+        c_chain_id: Option<&'static str>,
+        hrp: Option<&'static str>,
         skip_init: bool,
-    ) -> Result<Avalanche<'a>, AvalancheError> {
-        let mut avalanche: Avalanche<'a> = Avalanche::default();
-        avalanche.set_address(&host, port, protocol)?;
+    ) -> Result<Avalanche, AvalancheError> {
+        let mut avalanche: Avalanche = Avalanche::default();
+        avalanche.set_address(host, port, protocol)?;
         let network_id_resolved = network_id.unwrap_or(DEFAULT_NETWORK_ID);
-        let _x_chain_final: &'a str = match x_chain_id {
+        let _x_chain_final: &'static str = match x_chain_id {
             Some(x_chain_id_resolved) => {
                 x_chain_id_resolved
             }
@@ -61,7 +78,7 @@ impl<'a> Avalanche<'a> {
                 }
             }
         };
-        let _c_chain_final: &'a str = match c_chain_id {
+        let _c_chain_final: &'static str = match c_chain_id {
             Some(c_chain_id_resolved) => {
                 c_chain_id_resolved
             }
@@ -142,23 +159,23 @@ impl<'a> Avalanche<'a> {
             Client::builder().build::<_, hyper::Body>(https).request(request)
         }
     }
-    pub fn info(&self) -> Result<&Box<dyn ApiBase<'a>>, AvalancheError> {
+    pub fn info(&self) -> Result<&Box<dyn ApiBase>, AvalancheError> {
         self.apis.get("info").ok_or(AvalancheError::ApiNotInitialized {
             api: String::from("info")
         })
     }
 }
 
-impl<'a> AvalancheCore<'a> for Avalanche<'a> {
+impl AvalancheCore for Avalanche {
     fn set_address(
         &mut self,
-        mut host: &'a str,
+        host: &'static str,
         port: u32,
-        protocol: Option<&'a str>,
+        protocol: Option<&'static str>,
     ) -> Result<(), AvalancheError> {
         let re = Regex::new(r"[&#,@+()$~%':*?<>{}]").unwrap(); //TODO: Add "
-        host = &re.replace_all(&host, "");
-        let protocol_defined: &'a str = protocol.unwrap_or("http");
+        let host_resolved = &re.replace_all(host, "");
+        let protocol_defined: &'static str = protocol.unwrap_or("http");
         let protocols: Vec<&str> = vec!["http", "https"];
         if !protocols.contains(&protocol_defined) {
             return Err(AvalancheError::BadProtocol);
@@ -166,17 +183,17 @@ impl<'a> AvalancheCore<'a> for Avalanche<'a> {
         self.host = host;
         self.port = port;
         self.protocol = protocol_defined;
-        self.url = &format!("{}://{}:{}", &protocol_defined, &host, &port);
+        self.url = format!("{}://{}:{}", &protocol_defined, &host_resolved, &port);
         Ok(())
     }
     fn get_protocol(&self) -> &str {
-        &self.protocol
+        self.protocol
     }
     fn get_host(&self) -> &str {
-        &self.host
+        self.host
     }
     fn get_ip(&self) -> &str {
-        &self.ip
+        self.ip
     }
     fn get_port(&self) -> u32 {
         self.port
@@ -195,9 +212,9 @@ impl<'a> AvalancheCore<'a> for Avalanche<'a> {
         self.hrp = get_preferred_hrp(Some(network_id));
     }
     fn get_hrp(&self) -> &str {
-        &self.hrp
+        self.hrp
     }
-    fn set_hrp(&mut self, hrp: &'a str) {
+    fn set_hrp(&mut self, hrp: &'static str) {
         self.hrp = hrp;
     }
     fn set_header(&mut self, key: &str, value: &str) {
@@ -237,7 +254,7 @@ impl<'a> AvalancheCore<'a> for Avalanche<'a> {
     fn patch(&self, url: &str, post_data: Body, headers: HashMap<&str, &str>) -> ResponseFuture {
         self.request(url, Method::PATCH, HashMap::new(), post_data, headers)
     }
-    fn add_api(&mut self, api_name: &'a str, api: Box<dyn ApiBase<'a>>) {
+    fn add_api(&mut self, api_name: &'static str, api: Box<dyn ApiBase>) {
         self.apis.insert(api_name, api);
     }
 }
@@ -249,7 +266,7 @@ mod tests {
     #[test]
     fn it_works() {
         let avalanche: Result<Avalanche, AvalancheError> =
-            Avalanche::new(String::from("example.com"), 8000, Some("http"), None, None, None, None, false);
+            Avalanche::new("example.com", 8000, Some("http"), None, None, None, None, false);
         match avalanche {
             Ok(avalanche) => {
                 assert_eq!(avalanche.url, "http://example.com:8000");
@@ -263,7 +280,7 @@ mod tests {
     #[test]
     fn bad_character_in_host() {
         let avalanche: Result<Avalanche, AvalancheError> =
-            Avalanche::new(String::from("e&&xample.com"), 8000, Some("http"), None, None, None, None, false);
+            Avalanche::new("e&&xample.com", 8000, Some("http"), None, None, None, None, false);
         match avalanche {
             Ok(avalanche) => {
                 assert_eq!(avalanche.url, "http://example.com:8000");
@@ -277,7 +294,7 @@ mod tests {
     #[test]
     fn bad_protocol() {
         let avalanche: Result<Avalanche, AvalancheError> =
-            Avalanche::new(String::from("example.com"), 8000, Some("test"), None, None, None, None, false);
+            Avalanche::new("example.com", 8000, Some("test"), None, None, None, None, false);
         match avalanche {
             Ok(_) => {
                 assert!(false);

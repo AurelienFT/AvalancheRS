@@ -4,8 +4,8 @@ use hyper::{Body};
 use hyper::client::{ResponseFuture};
 use crate::common::api_base::ApiBase;
 
-pub trait AvalancheCore<'a> {
-    fn set_address(&mut self, host: &'a str, port: u32, protocol: Option<&'a str>) -> Result<(), AvalancheError>;
+pub trait AvalancheCore {
+    fn set_address(&mut self, host: &'static str, port: u32, protocol: Option<&'static str>) -> Result<(), AvalancheError>;
     fn get_protocol(&self) -> &str;
     fn get_host(&self) -> &str;
     fn get_ip(&self) -> &str;
@@ -15,7 +15,7 @@ pub trait AvalancheCore<'a> {
     fn get_network_id(&self) -> u16;
     fn set_network_id(&mut self, network_id: u16);
     fn get_hrp(&self) -> &str;
-    fn set_hrp(&mut self, hrp: &'a str);
+    fn set_hrp(&mut self, hrp: &'static str);
     fn set_header(&mut self, key: &str, value: &str);
     fn remove_header(&mut self, key: &str);
     fn remove_all_headers(&mut self);
@@ -25,5 +25,5 @@ pub trait AvalancheCore<'a> {
     fn post(&self, url: &str, post_data: Body, headers: HashMap<&str, &str>) -> ResponseFuture;
     fn put(&self, url: &str, post_data: Body, headers: HashMap<&str, &str>) -> ResponseFuture;
     fn patch(&self, url: &str, post_data: Body, headers: HashMap<&str, &str>) -> ResponseFuture;
-    fn add_api(&mut self, api_name: &'a str, api: Box<dyn ApiBase<'a>>);
+    fn add_api(&mut self, api_name: &'static str, api: Box<dyn ApiBase>);
 }

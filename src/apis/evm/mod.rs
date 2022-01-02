@@ -7,24 +7,24 @@ use clru::CLruCache;
 use std::num::NonZeroUsize;
 use crate::common::json_rpc_api::{JsonRpcApi};
 
-pub struct EvmAPI<'a> {
-    core: Box<dyn AvalancheCore<'a>>,
+pub struct EvmAPI {
+    core: Box<dyn AvalancheCore>,
     cache: CLruCache<String, String>
 }
 
-impl<'a> ApiBase<'a> for EvmAPI<'a> {
+impl ApiBase for EvmAPI {
     fn get_api_base_url(&self) -> &str {
         "/ext/bc/C/avax"
     }
     fn get_cache(&self) -> &CLruCache<String, String> {
         &self.cache
     }
-    fn get_core(&self) -> Box<&dyn AvalancheCore<'a>> {
+    fn get_core(&self) -> Box<&dyn AvalancheCore> {
         Box::new(&(*self.core))
     }
 }
 
-impl<'a> JsonRpcApi<'a> for EvmAPI<'a> {
+impl JsonRpcApi for EvmAPI {
     fn get_json_rpc_version(&self) -> String {
         String::from("2.0")
     }
@@ -34,7 +34,7 @@ impl<'a> JsonRpcApi<'a> for EvmAPI<'a> {
     }
 }
 
-impl<'a> EvmAPI<'a> {
+impl EvmAPI {
     pub fn new(core: Box<dyn AvalancheCore>) -> EvmAPI {
         EvmAPI {
             core,

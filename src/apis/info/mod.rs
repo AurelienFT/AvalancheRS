@@ -9,19 +9,19 @@ use crate::common::json_rpc_api::{JsonRpcApi, JsonRpcResponse, JsonRpcParams, de
 use num_bigint::BigInt;
 use std::str::FromStr;
 
-pub struct InfoAPI<'a> {
-    core: Box<dyn AvalancheCore<'a>>,
+pub struct InfoAPI {
+    core: Box<dyn AvalancheCore>,
     cache: CLruCache<String, String>
 }
 
-impl<'a> ApiBase<'a> for InfoAPI<'a> {
+impl ApiBase for InfoAPI {
     fn get_api_base_url(&self) -> &str {
         "/ext/info"
     }
     fn get_cache(&self) -> &CLruCache<String, String> {
         &self.cache
     }
-    fn get_core(&self) -> Box<&dyn AvalancheCore<'a>> {
+    fn get_core(&self) -> Box<&dyn AvalancheCore> {
         Box::new(&(*self.core))
     }
 }
@@ -104,7 +104,7 @@ pub struct ResponseUptime {
     pub weighted_average_percentage: String
 }
 
-impl<'a> JsonRpcApi<'a> for InfoAPI<'a> {
+impl JsonRpcApi for InfoAPI {
     fn get_json_rpc_version(&self) -> String {
         String::from("2.0")
     }
@@ -115,8 +115,8 @@ impl<'a> JsonRpcApi<'a> for InfoAPI<'a> {
 }
 
 //TODO: Better error management
-impl<'a> InfoAPI<'a> {
-    pub fn new(core: Box<dyn AvalancheCore<'a>>) -> InfoAPI<'a> {
+impl InfoAPI {
+    pub fn new(core: Box<dyn AvalancheCore>) -> InfoAPI {
         InfoAPI {
             core,
             cache: CLruCache::new(NonZeroUsize::new(2).unwrap())
@@ -196,35 +196,35 @@ mod tests {
 
     #[tokio::test]
     async fn get_blockchain_id_works() {
-        let avalanche = Avalanche::new(String::from(crate::utils::constants::MAINNET_API), 443, Some("https"), None, None, None, None, false).unwrap();
+        let avalanche = Avalanche::new(crate::utils::constants::MAINNET_API, 443, Some("https"), None, None, None, None, false).unwrap();
         let info_api: InfoAPI = InfoAPI::new(Box::new(avalanche));
         assert_eq!(info_api.get_blockchain_id("X").await.unwrap(), "2oYMBNV4eNHyqk2fjjV5nVQLDbtmNJzq5s3qs3Lo6ftnC6FByM");
     }
 
     #[tokio::test]
     async fn get_network_id_works() {
-        let avalanche = Avalanche::new(String::from(crate::utils::constants::MAINNET_API), 443, Some("https"), None, None, None, None, false).unwrap();
+        let avalanche = Avalanche::new(crate::utils::constants::MAINNET_API, 443, Some("https"), None, None, None, None, false).unwrap();
         let info_api: InfoAPI = InfoAPI::new(Box::new(avalanche));
         assert_eq!(info_api.get_network_id().await.unwrap(), 1);
     }
 
     #[tokio::test]
     async fn get_network_name_works() {
-        let avalanche = Avalanche::new(String::from(crate::utils::constants::MAINNET_API), 443, Some("https"), None, None, None, None, false).unwrap();
+        let avalanche = Avalanche::new(crate::utils::constants::MAINNET_API, 443, Some("https"), None, None, None, None, false).unwrap();
         let info_api: InfoAPI = InfoAPI::new(Box::new(avalanche));
         assert_eq!(info_api.get_network_name().await.unwrap(), "mainnet");
     }
 
     #[tokio::test]
     async fn get_node_version_works() {
-        let avalanche = Avalanche::new(String::from(crate::utils::constants::MAINNET_API), 443, Some("https"), None, None, None, None, false).unwrap();
+        let avalanche = Avalanche::new(crate::utils::constants::MAINNET_API, 443, Some("https"), None, None, None, None, false).unwrap();
         let info_api: InfoAPI = InfoAPI::new(Box::new(avalanche));
         assert_eq!(info_api.get_node_version().await.unwrap(), "avalanche/1.7.3");
     }
 
     #[tokio::test]
     async fn get_tx_works() {
-        let avalanche = Avalanche::new(String::from(crate::utils::constants::MAINNET_API), 443, Some("https"), None, None, None, None, false).unwrap();
+        let avalanche = Avalanche::new(crate::utils::constants::MAINNET_API, 443, Some("https"), None, None, None, None, false).unwrap();
         let info_api: InfoAPI = InfoAPI::new(Box::new(avalanche));
         assert_eq!(info_api.get_tx_fee().await.unwrap(), ResponseGetTxFee {
             tx_fee: BigInt::from_str("1000000").unwrap(),
@@ -234,7 +234,7 @@ mod tests {
 
     #[tokio::test]
     async fn is_bootstrapped_works() {
-        let avalanche = Avalanche::new(String::from(crate::utils::constants::MAINNET_API), 443, Some("https"), None, None, None, None, false).unwrap();
+        let avalanche = Avalanche::new(crate::utils::constants::MAINNET_API, 443, Some("https"), None, None, None, None, false).unwrap();
         let info_api: InfoAPI = InfoAPI::new(Box::new(avalanche));
         assert_eq!(info_api.is_bootstrapped("X").await.unwrap(), true);
     }
@@ -242,14 +242,14 @@ mod tests {
     //TODO: Real test but at least it test if it panics
     #[tokio::test]
     async fn peers_works() {
-        let avalanche = Avalanche::new(String::from(crate::utils::constants::MAINNET_API), 443, Some("https"), None, None, None, None, false).unwrap();
+        let avalanche = Avalanche::new(crate::utils::constants::MAINNET_API, 443, Some("https"), None, None, None, None, false).unwrap();
         let info_api: InfoAPI = InfoAPI::new(Box::new(avalanche));
         info_api.peers(None).await.unwrap();
     }
 
     #[tokio::test]
     async fn uptime_works_with_error() {
-        let avalanche = Avalanche::new(String::from(crate::utils::constants::MAINNET_API), 443, Some("https"), None, None, None, None, false).unwrap();
+        let avalanche = Avalanche::new(crate::utils::constants::MAINNET_API, 443, Some("https"), None, None, None, None, false).unwrap();
         let info_api: InfoAPI = InfoAPI::new(Box::new(avalanche));
         assert_eq!(info_api.uptime().await, Err(AvalancheError::ErrorJsonRpcCall{
             call: String::from("info.uptime"),

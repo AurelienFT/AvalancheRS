@@ -44,7 +44,7 @@ pub struct JsonRpcResponse<T> {
     pub result: T
 }
 
-pub trait JsonRpcApi<'a>: ApiBase<'a> {
+pub trait JsonRpcApi: ApiBase {
     fn get_json_rpc_version(&self) -> String;
     fn get_json_rpc_id(&self) -> u32;
     fn call_method(&self, method: String, params: Option<HashMap<String, JsonRpcParams>>, base_api_url: Option<&str>, headers: Option<HashMap<&str, &str>>) -> ResponseFuture {
