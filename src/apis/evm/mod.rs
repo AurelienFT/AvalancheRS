@@ -44,14 +44,14 @@ impl EvmAPI {
     }
 
     pub async fn get_base_fee(&self) -> Result<String, AvalancheError> {
-        let response = self.call_method(String::from("eth_baseFee"), None, Some("/ext/bc/C/rpc"), None).await?;
+        let response = self.call_method("eth_baseFee", None, Some("/ext/bc/C/rpc"), None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
         let response_formatted: JsonRpcResponse<String> = decode_json_rpc_body("eth_baseFee", body)?;
         Ok(response_formatted.result)
     }
 
     pub async fn get_max_priority_fee_per_gas(&self) -> Result<String, AvalancheError> {
-        let response = self.call_method(String::from("eth_maxPriorityFeePerGas"), None, Some("/ext/bc/C/rpc"), None).await?;
+        let response = self.call_method("eth_maxPriorityFeePerGas", None, Some("/ext/bc/C/rpc"), None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
         let response_formatted: JsonRpcResponse<String> = decode_json_rpc_body("eth_maxPriorityFeePerGas", body)?;
         Ok(response_formatted.result)

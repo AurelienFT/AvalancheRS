@@ -122,40 +122,40 @@ impl InfoAPI {
             cache: CLruCache::new(NonZeroUsize::new(2).unwrap())
         }
     }
-    pub async fn get_blockchain_id(&self, alias: &str) -> Result<String, AvalancheError> {
+    pub async fn get_blockchain_id<'a>(&self, alias: &'a str) -> Result<String, AvalancheError> {
         let mut params = HashMap::new();
-        params.insert(String::from("alias"), JsonRpcParams::String(String::from(alias)));
-        let response = self.call_method(String::from("info.getBlockchainID"), Some(params), None, None).await?;
+        params.insert(String::from("alias"), JsonRpcParams::Str(alias));
+        let response = self.call_method("info.getBlockchainID", Some(params), None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
         let response_formatted: JsonRpcResponse<ResponseJRPCGetBlockchainID> = decode_json_rpc_body("info.getBlockchainID", body)?;
         Ok(response_formatted.result.blockchain_id)
     }
     pub async fn get_network_id(&self) -> Result<i32, AvalancheError> {
-        let response = self.call_method(String::from("info.getNetworkID"), None, None, None).await?;
+        let response = self.call_method("info.getNetworkID", None, None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
         let response_formatted: JsonRpcResponse<ResponseJRPCGetNetworkID> = decode_json_rpc_body("info.getNetworkID", body)?;
         Ok(response_formatted.result.network_id.parse::<i32>().unwrap())
     }
     pub async fn get_network_name(&self) -> Result<String, AvalancheError> {
-        let response = self.call_method(String::from("info.getNetworkName"), None, None, None).await?;
+        let response = self.call_method("info.getNetworkName", None, None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
         let response_formatted: JsonRpcResponse<ResponseJRPCGetNetworkName> = decode_json_rpc_body("info.getNetworkName", body)?;
         Ok(response_formatted.result.network_name)
     }
     pub async fn get_node_id(&self) -> Result<String, AvalancheError> {
-        let response = self.call_method(String::from("info.getNodeID"), None, None, None).await?;
+        let response = self.call_method("info.getNodeID", None, None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
         let response_formatted: JsonRpcResponse<ResponseJRPCGetNodeID> = decode_json_rpc_body("info.getNodeID", body)?;
         Ok(response_formatted.result.node_id)
     }
     pub async fn get_node_version(&self) -> Result<String, AvalancheError> {
-        let response = self.call_method(String::from("info.getNodeVersion"), None, None, None).await?;
+        let response = self.call_method("info.getNodeVersion", None, None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
         let response_formatted: JsonRpcResponse<ResponseJRPCGetNodeVersion> = decode_json_rpc_body("info.getNodeVersion", body)?;
         Ok(response_formatted.result.version)
     }
     pub async fn get_tx_fee(&self) -> Result<ResponseGetTxFee, AvalancheError> {
-        let response = self.call_method(String::from("info.getTxFee"), None, None, None).await?;
+        let response = self.call_method("info.getTxFee", None, None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
         let response_formatted: JsonRpcResponse<ResponseJRPCGetTxFee> = decode_json_rpc_body("info.getTxFee", body)?;
         Ok(
@@ -165,10 +165,10 @@ impl InfoAPI {
             }
         )
     }
-    pub async fn is_bootstrapped(&self, chain: &str) -> Result<bool, AvalancheError> {
+    pub async fn is_bootstrapped<'a>(&self, chain: &'a str) -> Result<bool, AvalancheError> {
         let mut params = HashMap::new();
-        params.insert(String::from("chain"), JsonRpcParams::String(String::from(chain)));
-        let response = self.call_method(String::from("info.isBootstrapped"), Some(params), None, None).await?;
+        params.insert(String::from("chain"), JsonRpcParams::Str(chain));
+        let response = self.call_method("info.isBootstrapped", Some(params), None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
         let response_formatted: JsonRpcResponse<ResponseJRPCIsBootstrapped> = decode_json_rpc_body("info.isBootstrapped", body)?;
         Ok(response_formatted.result.is_bootstrapped)
@@ -176,13 +176,13 @@ impl InfoAPI {
     pub async fn peers(&self, node_ids: Option<Vec<String>>) -> Result<Vec<ResponsePeers>, AvalancheError> {
         let mut params = HashMap::new();
         params.insert(String::from("chain"), JsonRpcParams::VecString(node_ids.unwrap_or_default()));
-        let response = self.call_method(String::from("info.peers"), Some(params), None, None).await?;
+        let response = self.call_method("info.peers", Some(params), None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
         let response_formatted: JsonRpcResponse<ResponseJRPCPeers> = decode_json_rpc_body("info.peers", body)?;
         Ok(response_formatted.result.peers)
     }
     pub async fn uptime(&self) -> Result<ResponseUptime, AvalancheError> {
-        let response = self.call_method(String::from("info.uptime"), None, None, None).await?;
+        let response = self.call_method("info.uptime", None, None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
         let response_formatted: JsonRpcResponse<ResponseUptime> = decode_json_rpc_body("info.uptime", body)?;
         Ok(response_formatted.result)

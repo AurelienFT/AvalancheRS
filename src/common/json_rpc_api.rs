@@ -4,20 +4,20 @@ use std::collections::HashMap;
 use hyper::client::{ResponseFuture};
 use serde::{Serialize, Serializer, Deserialize};
 
-#[derive(Deserialize, Clone)]
-pub enum JsonRpcParams {
-    String(String),
-    HashMap(HashMap<String, JsonRpcParams>),
+#[derive(Deserialize, Clone, Debug)]
+pub enum JsonRpcParams<'a> {
+    Str(&'a str),
+    HashMap(HashMap<String, JsonRpcParams<'a>>),
     VecString(Vec<String>)
 }
 
-impl Serialize for JsonRpcParams {
+impl<'a> Serialize for JsonRpcParams<'a> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
         match self {
-            JsonRpcParams::String(s) => s.serialize(serializer),
+            JsonRpcParams::Str(s) => s.serialize(serializer),
             JsonRpcParams::HashMap(h) => h.serialize(serializer),
             JsonRpcParams::VecString(vs) => vs.serialize(serializer),
         }
@@ -47,16 +47,18 @@ pub struct JsonRpcResponse<T> {
 pub trait JsonRpcApi: ApiBase {
     fn get_json_rpc_version(&self) -> String;
     fn get_json_rpc_id(&self) -> u32;
-    fn call_method(&self, method: String, params: Option<HashMap<String, JsonRpcParams>>, base_api_url: Option<&str>, headers: Option<HashMap<&str, &str>>) -> ResponseFuture {
+    fn call_method(&self, method: &'static str, params: Option<HashMap<String, JsonRpcParams>>, base_api_url: Option<&str>, headers: Option<HashMap<&str, &str>>) -> ResponseFuture {
         let ep = base_api_url.unwrap_or_else(|| self.get_api_base_url());
         let mut params_call: HashMap<&str, JsonRpcParams> = HashMap::new();
-        params_call.insert("id", JsonRpcParams::String(self.get_json_rpc_id().to_string()));
-        params_call.insert("method", JsonRpcParams::String(method));
+        let id = &self.get_json_rpc_id().to_string();
+        let version = &self.get_json_rpc_version().to_string();
+        params_call.insert("id", JsonRpcParams::Str(id));
+        params_call.insert("method", JsonRpcParams::Str(method));
         if let Some(p) = params {
             params_call.insert("params", JsonRpcParams::HashMap(p));
         }
         if self.get_json_rpc_version() != "1.0" {
-            params_call.insert("jsonrpc", JsonRpcParams::String(self.get_json_rpc_version()));
+            params_call.insert("jsonrpc", JsonRpcParams::Str(version));
         }
         let mut headers_call = match headers {
             Some(h) => h,

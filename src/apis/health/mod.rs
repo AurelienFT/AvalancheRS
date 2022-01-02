@@ -72,10 +72,10 @@ impl HealthAPI {
             cache: CLruCache::new(NonZeroUsize::new(2).unwrap())
         }
     }
-    pub async fn health(&self, alias: &str) -> Result<ResponseHealth, AvalancheError> {
+    pub async fn health(&self, alias: &'static str) -> Result<ResponseHealth, AvalancheError> {
         let mut params = HashMap::new();
-        params.insert(String::from("alias"), JsonRpcParams::String(String::from(alias)));
-        let response = self.call_method(String::from("health.health"), Some(params), None, None).await?;
+        params.insert(String::from("alias"), JsonRpcParams::Str(alias));
+        let response = self.call_method("health.health", Some(params), None, None).await?;
         let body = &hyper::body::to_bytes(response.into_body()).await?;
         let response_formatted: JsonRpcResponse<ResponseHealth> = decode_json_rpc_body("health.health", body)?;
         Ok(response_formatted.result)
